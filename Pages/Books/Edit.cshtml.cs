@@ -36,8 +36,14 @@ namespace Muntean_Radu_Lab2.Pages.Books
                 return NotFound();
             }
             Book = book;
-            ViewData["PublisherID"] = new SelectList(_context.Set<Publisher>(), "ID",
-"PublisherName");
+
+            ViewData["PublisherID"] = new SelectList(_context.Set<Publisher>(), "ID", "PublisherName");
+
+            var authorsList = await _context.Set<Author>()
+                .Select(a => new { a.ID, FullName = a.FirstName + " " + a.LastName })
+                .ToListAsync();
+            ViewData["AuthorID"] = new SelectList(authorsList, "ID", "FullName", Book.AuthorID);
+
             return Page();
         }
 
@@ -47,6 +53,14 @@ namespace Muntean_Radu_Lab2.Pages.Books
         {
             if (!ModelState.IsValid)
             {
+                // Rebuild selects just like OnGet so the page can re-render with dropdowns
+                ViewData["PublisherID"] = new SelectList(_context.Set<Publisher>(), "ID", "PublisherName");
+
+                var authorsList = await _context.Set<Author>()
+                    .Select(a => new { a.ID, FullName = a.FirstName + " " + a.LastName })
+                    .ToListAsync();
+                ViewData["AuthorID"] = new SelectList(authorsList, "ID", "FullName", Book.AuthorID);
+
                 return Page();
             }
 

@@ -16,6 +16,7 @@
             <th>
                 @Html.DisplayNameFor(model => model.Book[0].Title)
             </th>
+            <th>Author</th>
             <th>
                 @Html.DisplayNameFor(model => model.Book[0].Author)
             </th>
@@ -38,7 +39,16 @@
                 @Html.DisplayFor(modelItem => item.Title)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Author)
+                @if (item.Author != null)
+                {
+                    <a asp-page="/Books/Index" asp-route-AuthorId="@item.AuthorID">
+                        @item.Author.FirstName @item.Author.LastName
+                    </a>
+                }
+                else
+                {
+                    @:—
+                }
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Price)

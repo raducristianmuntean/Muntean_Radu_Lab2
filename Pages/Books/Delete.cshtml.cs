@@ -29,17 +29,21 @@ namespace Muntean_Radu_Lab2.Pages.Books
                 return NotFound();
             }
 
-            var book = await _context.Book.FirstOrDefaultAsync(m => m.ID == id);
+            // Include Author și Publisher
+            var book = await _context.Book
+                .Include(b => b.Author)
+                .Include(b => b.Publisher)
+                .FirstOrDefaultAsync(m => m.ID == id);
 
-            if (book is not null)
+            if (book == null)
             {
-                Book = book;
-
-                return Page();
+                return NotFound();
             }
 
-            return NotFound();
+            Book = book;
+            return Page();
         }
+
 
         public async Task<IActionResult> OnPostAsync(int? id)
         {
