@@ -63,8 +63,9 @@ namespace Muntean_Radu_Lab2.Pages.Books
 
         private void PopulateAssignedCategoryData(Muntean_Radu_Lab2Context context, Book book)
         {
-            var allCategories = context.Category;
-            var bookCategories = new HashSet<int>(book.BookCategories.Select(c => c.CategoryID));
+            var allCategories = context.Category.ToList();
+            // guard against null BookCategories
+            var bookCategories = new HashSet<int>(book.BookCategories?.Select(c => c.CategoryID) ?? Enumerable.Empty<int>());
             var assignedCategoryData = new List<AssignedCategoryData>();
             foreach (var category in allCategories)
             {
@@ -75,6 +76,9 @@ namespace Muntean_Radu_Lab2.Pages.Books
                     Assigned = bookCategories.Contains(category.ID)
                 });
             }
+
+            // set the strongly-typed property used by the Razor page and keep ViewData for compatibility
+            AssignedCategoryDataList = assignedCategoryData;
             ViewData["Categories"] = assignedCategoryData;
         }
 

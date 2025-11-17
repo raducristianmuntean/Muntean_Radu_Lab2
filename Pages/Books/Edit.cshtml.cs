@@ -28,6 +28,7 @@ namespace Muntean_Radu_Lab2.Pages.Books
             }
             Book = await _context.Book
                 .Include(b => b.Publisher)
+                .Include(b => b.Author) // include author so navigation is available if needed
                 .Include(b => b.BookCategories).ThenInclude(b => b.Category)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(b => ((Book)b).ID == id);
@@ -40,7 +41,7 @@ namespace Muntean_Radu_Lab2.Pages.Books
             {
                 x.ID,
                 FullName = x.LastName + " " + x.FirstName
-            });
+            }).ToList(); // materialize for the SelectList
             ViewData["AuthorID"] = new SelectList(authorList, "ID", "FullName");
             ViewData["PublisherID"] = new SelectList(_context.Publisher, "ID",
            "PublisherName");
@@ -56,6 +57,7 @@ namespace Muntean_Radu_Lab2.Pages.Books
             }
             var bookToUpdate = await _context.Book
             .Include(i => i.Publisher)
+            .Include(i => i.Author) // ensure author nav is loaded when needed
             .Include(i => i.BookCategories)
             .ThenInclude(i => i.Category)
             .FirstOrDefaultAsync(s => s.ID == id);
@@ -63,11 +65,11 @@ namespace Muntean_Radu_Lab2.Pages.Books
             {
                 return NotFound();
             }
-            //se va modifica AuthorID conform cu sarcina de la lab 2
+            // Bind the foreign-key AuthorID (not the navigation property)
             if (await TryUpdateModelAsync<Book>(
             bookToUpdate,
             "Book",
-            i => i.Title, i => i.Author,
+            i => i.Title, i => i.AuthorID,
             i => i.Price, i => i.PublishingDate, i => i.PublisherID))
             {
                 UpdateBookCategories(_context, selectedCategories, bookToUpdate);

@@ -16,7 +16,6 @@
             <th>
                 @Html.DisplayNameFor(model => model.Book[0].Title)
             </th>
-            <th>Author</th>
             <th>
                 @Html.DisplayNameFor(model => model.Book[0].Author)
             </th>
@@ -29,12 +28,21 @@
             <th>
                 @Html.DisplayNameFor(model => model.Book[0].Publisher.PublisherName)
             </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Book[0].BookCategories)
+            </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model.Book) {
-        <tr>
+        @foreach (var item in Model.BookD.Books)
+        {
+            string selectedRow = "";
+            if (item.ID == Model.BookID)
+            {
+                selectedRow = "table-success";
+            }
+            <tr class="@selectedRow">
             <td>
                 @Html.DisplayFor(modelItem => item.Title)
             </td>
@@ -59,6 +67,11 @@
             <td>
                     @Html.DisplayFor(modelItem => item.Publisher.PublisherName)
             </td>
+            <td>
+                @foreach (var bc in item.BookCategories)
+                {
+                    @bc.Category.CategoryName<br />
+                    }
             <td>
                 <a asp-page="./Edit" asp-route-id="@item.ID">Edit</a> |
                 <a asp-page="./Details" asp-route-id="@item.ID">Details</a> |

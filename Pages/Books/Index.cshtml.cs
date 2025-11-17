@@ -22,35 +22,32 @@ namespace Muntean_Radu_Lab2.Pages.Books
 
         public IList<Book> Book { get; set; } = default!;
 
-        // Lista pentru dropdown
-        public SelectList Authors { get; set; }
-
-        // Parametru de filtrare
-        [BindProperty(SupportsGet = true)]
-        public int? AuthorId { get; set; }
-
-        public async Task OnGetAsync()
+        public BookData BookD { get; set; }
+        public int BookID { get; set; }
+        public int CategoryID { get; set; }
+        public async Task OnGetAsync(int? id, int? categoryID)
         {
-            // Interogare cărți cu Publisher și Author
-            var booksQuery = _context.Book
+            BookD = new BookData();
+
+            var books = await _context.Book
                 .Include(b => b.Publisher)
-                .Include(b => b.Author)
-                .AsQueryable();
-
-            // Filtrare după autor dacă AuthorId e setat
-            if (AuthorId.HasValue)
-            {
-                booksQuery = booksQuery.Where(b => b.AuthorID == AuthorId.Value);
-            }
-
-            Book = await booksQuery.ToListAsync();
-
-            // FIX: Use Set<Author>() instead of _context.Author
-            var authorsList = await _context.Set<Author>()
-                .Select(a => new { a.ID, FullName = a.FirstName + " " + a.LastName })
+                .Include(b => b.Author)                 // <- include author navigation
+                .Include(b => b.BookCategories)
+                .ThenInclude(bc => bc.Category)
+                .AsNoTracking()
+                .OrderBy(b => b.Title)
                 .ToListAsync();
 
-            Authors = new SelectList(authorsList, "ID", "FullName", AuthorId);
+            BookD.Books = books;
+
+            if (id != null)
+            {
+                BookID = id.Value;
+                Book book = books
+                    .Where(i => i.ID == id.Value)
+                    .Single();
+                BookD.Categories = book.BookCategories.Select(s => s.Category);
+            }
         }
     }
 }
