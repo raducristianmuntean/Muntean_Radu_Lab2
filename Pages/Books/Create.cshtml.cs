@@ -19,47 +19,70 @@ namespace Muntean_Radu_Lab2.Pages.Books
         {
             _context = context;
         }
-
-        public SelectList AuthorList { get; set; } = default!;
-
-        [BindProperty]
-        public Book Book { get; set; } = default!;
-
         public IActionResult OnGet()
         {
-            ViewData["PublisherID"] = new SelectList(_context.Set<Publisher>(), "ID", "PublisherName");
-
-            var authorsList = _context.Set<Author>()
-                .Select(a => new { a.ID, FullName = a.FirstName + " " + a.LastName })
+            var authorList = _context.Author
+                .Select(x => new
+                {
+                    x.ID,
+                    FullName = x.LastName + " " + x.FirstName
+                })
                 .ToList();
-            ViewData["AuthorID"] = new SelectList(authorsList, "ID", "FullName");
 
-            AuthorList = new SelectList(_context.Set<Author>(), "ID", "LastName");
+            ViewData["AuthorID"] = new SelectList(authorList, "ID", "FullName");
+            ViewData["PublisherID"] = new SelectList(_context.Publisher, "ID", "PublisherName");
 
+            var book = new Book();
+            book.BookCategories = new List<BookCategory>();
+            PopulateAssignedCategoryData(_context, book);
             return Page();
         }
-
-        public async Task<IActionResult> OnPostAsync()
+        [BindProperty]
+        public Book Book { get; set; }
+        public List<AssignedCategoryData> AssignedCategoryDataList { get; set; }
+        public async Task<IActionResult> OnPostAsync(string[] selectedCategories)
         {
-            if (!ModelState.IsValid)
+            var newBook = new Book();
+            if (selectedCategories != null)
             {
-                // 🔹 Reîncărcăm dropdown-urile dacă formularul este invalid
-                ViewData["PublisherID"] = new SelectList(_context.Set<Publisher>(), "ID", "PublisherName");
-
-                var authorsList = await _context.Set<Author>()
-                    .Select(a => new { a.ID, FullName = a.FirstName + " " + a.LastName })
-                    .ToListAsync(); 
-                ViewData["AuthorID"] = new SelectList(authorsList, "ID", "FullName");
-
-                AuthorList = new SelectList(_context.Set<Author>(), "ID", "LastName");
-
-                return Page();
+                newBook.BookCategories = new List<BookCategory>();
+                foreach (var cat in selectedCategories)
+                {
+                    var catToAdd = new BookCategory
+                    {
+                        CategoryID = int.Parse(cat)
+                    };
+                    newBook.BookCategories.Add(catToAdd);
+                }
             }
-
+            Book.BookCategories = newBook.BookCategories;
             _context.Book.Add(Book);
             await _context.SaveChangesAsync();
-
             return RedirectToPage("./Index");
+        }
+
+        private void PopulateAssignedCategoryData(Muntean_Radu_Lab2Context context, Book book)
+        {
+            var allCategories = context.Category;
+            var bookCategories = new HashSet<int>(book.BookCategories.Select(c => c.CategoryID));
+            var assignedCategoryData = new List<AssignedCategoryData>();
+            foreach (var category in allCategories)
+            {
+                assignedCategoryData.Add(new AssignedCategoryData
+                {
+                    CategoryID = category.ID,
+                    Name = category.CategoryName,
+                    Assigned = bookCategories.Contains(category.ID)
+                });
+            }
+            ViewData["Categories"] = assignedCategoryData;
+        }
+
+        public class AssignedCategoryData
+        {
+            public int CategoryID { get; set; }
+            public string Name { get; set; }
+            public bool Assigned { get; set; }
         }
     }
 }
