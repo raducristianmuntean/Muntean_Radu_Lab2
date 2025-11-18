@@ -14,7 +14,15 @@ namespace Muntean_Radu_Lab2.Models
         [Display(Name = "Last Name")]
         public string LastName { get; set; }
 
-        // Optional: dacă vrei relație one-to-many
+        [Display(Name = "Full Name")]
+        public string FullName
+        {
+            get
+            {
+                return FirstName + " " + LastName;
+            }
+        }
+
         public ICollection<Book>? Books { get; set; }
     }
 }
