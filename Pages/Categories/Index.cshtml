@@ -5,11 +5,12 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<h1>Categories</h1>
 
 <p>
     <a asp-page="Create">Create New</a>
 </p>
+
 <table class="table">
     <thead>
         <tr>
@@ -23,7 +24,8 @@
 @foreach (var item in Model.Category) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.CategoryName)
+                <!-- Link the category name to this Index page with the category id -->
+                <a asp-page="./Index" asp-route-id="@item.ID">@Html.DisplayFor(modelItem => item.CategoryName)</a>
             </td>
             <td>
                 <a asp-page="./Edit" asp-route-id="@item.ID">Edit</a> |
@@ -34,3 +36,31 @@
 }
     </tbody>
 </table>
+
+@if (Model.BookD != null && Model.BookD.Books != null && Model.BookD.Books.Any())
+{
+    var selectedCategory = Model.Category?.FirstOrDefault(c => c.ID == Model.CategoryID);
+    <h2>Books in @((selectedCategory != null) ? selectedCategory.CategoryName : "selected category")</h2>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Author</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var book in Model.BookD.Books)
+        {
+            <tr>
+                <td>@book.Title</td>
+                <td>@(book.Author != null ? book.Author.FullName : "")</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+else if (Model.CategoryID != 0)
+{
+    <p>No books found for this category.</p>
+}
