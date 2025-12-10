@@ -25,7 +25,9 @@ namespace Muntean_Radu_Lab2.Pages.Borrowings
         {
             Borrowing = await _context.Borrowing
                 .Include(b => b.Book)
-                .Include(b => b.Member).ToListAsync();
+                    .ThenInclude(book => book.Author)
+                .Include(b => b.Member)
+                .ToListAsync();
         }
     }
 }
