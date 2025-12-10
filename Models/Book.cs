@@ -7,6 +7,8 @@ namespace Muntean_Radu_Lab2.Models
     {
         public int ID { get; set; }
         
+        [Required(ErrorMessage = "Titlul cărții este obligatoriu")]
+        [StringLength(150, MinimumLength = 3, ErrorMessage = "Titlul trebuie să aibă între 3 și 150 de caractere")]
         [Display(Name = "Book Title")]
         public string Title { get; set; }
         
